@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Binary Nixie Watch</title>
+    <meta name="description" content="A beautiful binary clock with vintage Nixie tube aesthetics">
+    <link rel="icon" type="image/x-icon" href="/src/assets/favicon.ico">
+    <link rel="stylesheet" href="/src/css/styles.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.8.5/d3.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/tone/14.8.49/Tone.min.js"></script>
+</head>
+<body>
+<div class="background-glow"></div>
+<div class="startup-overlay" id="startup">
+    <div class="startup-text">INITIALIZING BINARY CHRONOMETER...</div>
+</div>
+
+<button class="sound-toggle" id="soundToggle">
+    <div class="sound-icon">🔇</div>
+    <span>SOUND</span>
+</button>
+
+<div class="scene">
+    <div class="watch-container" id="watchContainer">
+        <div class="watch-base">
+            <div class="time-display" id="timeDisplay">--:--:--</div>
+
+            <div class="binary-section">
+                <div class="section-label">Hours</div>
+                <svg id="hoursSvg" width="300" height="100"></svg>
+            </div>
+
+            <div class="binary-section">
+                <div class="section-label">Minutes</div>
+                <svg id="minutesSvg" width="360" height="100"></svg>
+            </div>
+
+            <div class="binary-section">
+                <div class="section-label">Seconds</div>
+                <svg id="secondsSvg" width="360" height="100"></svg>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+  // Wait for all external libraries to load before initializing
+  let d3Loaded = false;
+  let toneLoaded = false;
+
+  function checkLibrariesAndInit() {
+    if (d3Loaded && toneLoaded) {
+      // Load modules dynamically after libraries are ready
+      import('/src/js/svg-definitions.js').then(({ SVGDefinitions }) => {
+        window.SVGDefinitions = SVGDefinitions;
+        return import('/src/js/audio-manager.js');
+      }).then(({ AudioManager }) => {
+        window.AudioManager = AudioManager;
+        return import('/src/js/nixie-watch.js');
+      }).then(({ BinaryNixieWatch }) => {
+        window.BinaryNixieWatch = BinaryNixieWatch;
+        new BinaryNixieWatch();
+      });
+    }
+  }
+
+  // Check when D3 loads
+  function checkD3() {
+    if (typeof d3 !== 'undefined') {
+      d3Loaded = true;
+      checkLibrariesAndInit();
+    } else {
+      setTimeout(checkD3, 50);
+    }
+  }
+
+  // Check when Tone loads
+  function checkTone() {
+    if (typeof Tone !== 'undefined') {
+      toneLoaded = true;
+      checkLibrariesAndInit();
+    } else {
+      setTimeout(checkTone, 50);
+    }
+  }
+
+  window.addEventListener('load', () => {
+    checkD3();
+    checkTone();
+  });
+</script>
+</body>
+</html>

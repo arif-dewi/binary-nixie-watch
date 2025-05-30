@@ -1,0 +1,203 @@
+/* ==========================================================================
+   RESET & BASE STYLES
+   ========================================================================== */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    background: radial-gradient(ellipse at center, #1a1a2e 0%, #0f0f1e 100%);
+    min-height: 100vh;
+    font-family: 'Courier New', monospace;
+    overflow: hidden;
+    cursor: crosshair;
+}
+
+/* ==========================================================================
+   SCENE & CONTAINER
+   ========================================================================== */
+.scene {
+    perspective: 1200px;
+    height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+}
+
+.watch-container {
+    transform-style: preserve-3d;
+    transition: transform 0.15s ease-out;
+}
+
+.watch-base {
+    background: linear-gradient(145deg, #2c2c54, #1a1a2e);
+    border-radius: 25px;
+    padding: 50px 60px;
+    box-shadow:
+            0 30px 80px rgba(0,0,0,0.6),
+            inset 0 2px 0 rgba(255,255,255,0.1),
+            inset 0 -2px 0 rgba(0,0,0,0.5),
+            0 0 50px rgba(255,106,0,0.1);
+    border: 1px solid rgba(255,165,0,0.2);
+    position: relative;
+}
+
+.watch-base::before {
+    content: '';
+    position: absolute;
+    top: 10px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 80%;
+    height: 3px;
+    background: linear-gradient(90deg,
+    transparent,
+    rgba(255,255,255,0.3),
+    transparent);
+    border-radius: 2px;
+}
+
+/* ==========================================================================
+   TIME DISPLAY & SECTIONS
+   ========================================================================== */
+.time-display {
+    color: #ff6a00;
+    text-align: center;
+    margin-bottom: 35px;
+    font-size: 1.4em;
+    text-shadow: 0 0 15px #ff6a00;
+    opacity: 0.9;
+    letter-spacing: 2px;
+}
+
+.binary-section {
+    margin: 25px 0;
+}
+
+.section-label {
+    color: rgba(255,165,0,0.6);
+    font-size: 0.9em;
+    text-align: center;
+    margin-bottom: 15px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+/* ==========================================================================
+   BACKGROUND EFFECTS
+   ========================================================================== */
+.background-glow {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: radial-gradient(circle at var(--glow-x, 50%) var(--glow-y, 50%),
+    rgba(255,106,0,0.05) 0%,
+    transparent 50%);
+    pointer-events: none;
+    transition: all 0.3s ease;
+}
+
+/* ==========================================================================
+   STARTUP OVERLAY
+   ========================================================================== */
+.startup-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: #0f0f1e;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+    transition: opacity 0.5s ease;
+}
+
+.startup-text {
+    color: #ff6a00;
+    font-size: 1.5em;
+    text-shadow: 0 0 20px #ff6a00;
+    animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+    0%, 100% { opacity: 0.5; }
+    50% { opacity: 1; }
+}
+
+/* ==========================================================================
+   SOUND CONTROLS
+   ========================================================================== */
+.sound-toggle {
+    position: fixed;
+    top: 30px;
+    right: 30px;
+    background: rgba(44,44,84,0.9);
+    border: 1px solid rgba(255,165,0,0.3);
+    border-radius: 50px;
+    padding: 12px 20px;
+    color: #ff6a00;
+    font-family: 'Courier New', monospace;
+    font-size: 0.9em;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    backdrop-filter: blur(10px);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    z-index: 50;
+}
+
+.sound-toggle:hover {
+    background: rgba(44,44,84,1);
+    box-shadow: 0 0 20px rgba(255,165,0,0.3);
+    transform: scale(1.05);
+}
+
+.sound-toggle.active {
+    background: rgba(255,106,0,0.2);
+    border-color: #ff6a00;
+    box-shadow: 0 0 15px rgba(255,106,0,0.4);
+}
+
+.sound-icon {
+    width: 16px;
+    height: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* ==========================================================================
+   TUBE INTERACTIONS
+   ========================================================================== */
+.tube {
+    cursor: pointer;
+    transition: filter 0.2s ease;
+}
+
+.tube:hover {
+    filter: brightness(1.2);
+}
+
+/* ==========================================================================
+   TOOLTIPS
+   ========================================================================== */
+.tooltip {
+    position: absolute;
+    background: rgba(0,0,0,0.9);
+    color: #ff6a00;
+    padding: 8px 12px;
+    border-radius: 8px;
+    font-size: 0.9em;
+    border: 1px solid rgba(255,165,0,0.3);
+    pointer-events: none;
+    z-index: 100;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.5);
+}

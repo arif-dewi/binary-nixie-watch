@@ -1,0 +1,41 @@
+{
+  "name": "binary-nixie-watch",
+  "version": "1.0.0",
+  "description": "A beautiful binary clock with Nixie tube aesthetics and D3.js animations",
+  "main": "index.html",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview",
+    "deploy": "npm run build && npm run deploy:gh-pages",
+    "deploy:gh-pages": "gh-pages -d dist",
+    "serve": "vite preview --port=3000",
+    "lint": "eslint src/js/**/*.js",
+    "format": "prettier --write \"src/**/*.{js,css,html}\"",
+    "watch": "concurrently \"npm run dev\" \"npm run lint:watch\"",
+    "lint:watch": "eslint src/js/**/*.js --watch"
+  },
+  "keywords": [
+    "binary-clock",
+    "nixie-tubes",
+    "d3js",
+    "animation",
+    "web-audio",
+    "javascript",
+    "css3",
+    "svg"
+  ],
+  "author": "Your Name",
+  "license": "MIT",
+  "devDependencies": {
+    "concurrently": "^8.0.0",
+    "eslint": "^8.0.0",
+    "gh-pages": "^6.0.0",
+    "prettier": "^3.0.0",
+    "vite": "^6.3.5"
+  },
+  "dependencies": {
+    "d3": "^7.8.5",
+    "tone": "^14.8.49"
+  }
+}
