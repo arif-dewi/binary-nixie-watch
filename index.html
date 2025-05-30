@@ -5,8 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Binary Nixie Watch</title>
     <meta name="description" content="A beautiful binary clock with vintage Nixie tube aesthetics">
-    <link rel="icon" type="image/x-icon" href="/src/assets/favicon.ico">
-    <link rel="stylesheet" href="/src/css/styles.css">
+    <link rel="stylesheet" href="./src/css/styles.css">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.8.5/d3.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/tone/14.8.49/Tone.min.js"></script>
 </head>
@@ -44,23 +43,30 @@
     </div>
 </div>
 
-<script>
+<script type="module">
   // Wait for all external libraries to load before initializing
   let d3Loaded = false;
   let toneLoaded = false;
 
   function checkLibrariesAndInit() {
     if (d3Loaded && toneLoaded) {
-      // Load modules dynamically after libraries are ready
-      import('/src/js/svg-definitions.js').then(({ SVGDefinitions }) => {
+      // Load modules dynamically after libraries are ready - FIXED PATHS
+      Promise.all([
+        import('./src/js/svg-definitions.js'),
+        import('./src/js/audio-manager.js'),
+        import('./src/js/nixie-watch.js')
+      ]).then(([{ SVGDefinitions }, { AudioManager }, { BinaryNixieWatch }]) => {
+        // Make classes available globally if needed
         window.SVGDefinitions = SVGDefinitions;
-        return import('/src/js/audio-manager.js');
-      }).then(({ AudioManager }) => {
         window.AudioManager = AudioManager;
-        return import('/src/js/nixie-watch.js');
-      }).then(({ BinaryNixieWatch }) => {
         window.BinaryNixieWatch = BinaryNixieWatch;
+
+        // Initialize the watch
         new BinaryNixieWatch();
+      }).catch(error => {
+        console.error('Failed to load modules:', error);
+        // Show user-friendly error
+        document.getElementById('startup').innerHTML = '<div class="startup-text">Loading Error - Please Refresh</div>';
       });
     }
   }
@@ -85,6 +91,7 @@
     }
   }
 
+  // Start checking when page loads
   window.addEventListener('load', () => {
     checkD3();
     checkTone();
