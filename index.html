@@ -6,8 +6,9 @@
     <title>Binary Nixie Watch</title>
     <meta name="description" content="A beautiful binary clock with vintage Nixie tube aesthetics">
     <link rel="stylesheet" href="./src/css/styles.css">
+    <!-- Load D3 immediately - it doesn't create AudioContext -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.8.5/d3.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/tone/14.8.49/Tone.min.js"></script>
+    <!-- DON'T load Tone.js here - we'll load it lazily after user interaction -->
 </head>
 <body>
 <div class="background-glow"></div>
@@ -44,30 +45,59 @@
 </div>
 
 <script type="module">
-  // Wait for all external libraries to load before initializing
   let d3Loaded = false;
   let toneLoaded = false;
+  let toneLoadingPromise = null;
+  let watchInitialized = false;
 
-  function checkLibrariesAndInit() {
-    if (d3Loaded && toneLoaded) {
-      // Load modules dynamically after libraries are ready - FIXED PATHS
-      Promise.all([
+  // Function to dynamically load Tone.js
+  function loadToneJS() {
+    if (toneLoadingPromise) return toneLoadingPromise;
+
+    toneLoadingPromise = new Promise((resolve, reject) => {
+      const script = document.createElement('script');
+      script.src = 'https://cdnjs.cloudflare.com/ajax/libs/tone/14.8.49/Tone.min.js';
+      script.onload = () => {
+        toneLoaded = true;
+        // Make Tone available globally
+        window.Tone = Tone;
+        resolve();
+      };
+      script.onerror = () => {
+        console.error('❌ Failed to load Tone.js');
+        reject(new Error('Failed to load Tone.js'));
+      };
+      document.head.appendChild(script);
+    });
+
+    return toneLoadingPromise;
+  }
+
+  // Make the Tone loader available globally so AudioManager can use it
+  window.loadToneJS = loadToneJS;
+
+  // Function to initialize the watch (without audio initially)
+  async function initializeWatchWithoutAudio() {
+    if (watchInitialized) return;
+
+    try {
+      const [{ SVGDefinitions }, { AudioManager }, { BinaryNixieWatch }] = await Promise.all([
         import('./src/js/svg-definitions.js'),
         import('./src/js/audio-manager.js'),
         import('./src/js/nixie-watch.js')
-      ]).then(([{ SVGDefinitions }, { AudioManager }, { BinaryNixieWatch }]) => {
-        // Make classes available globally if needed
-        window.SVGDefinitions = SVGDefinitions;
-        window.AudioManager = AudioManager;
-        window.BinaryNixieWatch = BinaryNixieWatch;
+      ]);
 
-        // Initialize the watch
-        new BinaryNixieWatch();
-      }).catch(error => {
-        console.error('Failed to load modules:', error);
-        // Show user-friendly error
-        document.getElementById('startup').innerHTML = '<div class="startup-text">Loading Error - Please Refresh</div>';
-      });
+      // Make classes available globally
+      window.SVGDefinitions = SVGDefinitions;
+      window.AudioManager = AudioManager;
+      window.BinaryNixieWatch = BinaryNixieWatch;
+
+      // Initialize the watch
+      window.nixieWatch = new BinaryNixieWatch();
+      watchInitialized = true;
+    } catch (error) {
+      document.getElementById('startup').innerHTML =
+        '<div class="startup-text">Loading Error - Please Refresh</div>';
     }
   }
 
@@ -75,26 +105,30 @@
   function checkD3() {
     if (typeof d3 !== 'undefined') {
       d3Loaded = true;
-      checkLibrariesAndInit();
+      initializeWatchWithoutAudio();
     } else {
       setTimeout(checkD3, 50);
     }
   }
 
-  // Check when Tone loads
-  function checkTone() {
-    if (typeof Tone !== 'undefined') {
-      toneLoaded = true;
-      checkLibrariesAndInit();
-    } else {
-      setTimeout(checkTone, 50);
-    }
+  // Set up early user interaction detection for audio
+  function setupAudioInteractionDetection() {
+    const handleFirstInteraction = async () => {
+      // Remove listeners after first interaction
+      document.removeEventListener('click', handleFirstInteraction);
+      document.removeEventListener('keydown', handleFirstInteraction);
+      document.removeEventListener('touchstart', handleFirstInteraction);
+    };
+
+    document.addEventListener('click', handleFirstInteraction);
+    document.addEventListener('keydown', handleFirstInteraction);
+    document.addEventListener('touchstart', handleFirstInteraction);
   }
 
-  // Start checking when page loads
+  // Start the initialization process
   window.addEventListener('load', () => {
+    setupAudioInteractionDetection();
     checkD3();
-    checkTone();
   });
 </script>
 </body>

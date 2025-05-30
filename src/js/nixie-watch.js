@@ -21,7 +21,6 @@ export class BinaryNixieWatch {
   }
 
   setupEventListeners() {
-    // Mouse movement for 3D camera effect
     document.addEventListener('mousemove', (e) => {
       if (this.isStarting) return;
 
@@ -34,14 +33,23 @@ export class BinaryNixieWatch {
       d3.select('#watchContainer')
         .style('transform', `rotateY(${rotateY}deg) rotateX(${rotateX}deg)`);
 
-      // Dynamic background glow
       document.documentElement.style.setProperty('--glow-x', (e.clientX / window.innerWidth * 100) + '%');
       document.documentElement.style.setProperty('--glow-y', (e.clientY / window.innerHeight * 100) + '%');
     });
 
-    // Sound toggle
-    d3.select('#soundToggle').on('click', () => {
-      this.audioManager.toggleSound();
+    d3.select('#soundToggle').on('click', async () => {
+      try {
+        // The audio manager will handle loading Tone.js if needed
+        await this.audioManager.toggleSound();
+      } catch (error) {
+        console.warn('🔇 Failed to start audio:', error);
+
+        // Update UI to show audio is disabled
+        const button = d3.select('#soundToggle');
+        const icon = button.select('.sound-icon');
+        button.classed('active', false);
+        icon.text('🔇');
+      }
     });
   }
 
@@ -77,7 +85,9 @@ export class BinaryNixieWatch {
       const svg = svgs[i];
       await new Promise(resolve => {
         this.createTubes(svg.id, svg.bits, true);
-        this.audioManager.playStartupSequenceSound(i);
+        if (this.audioManager.soundEnabled && this.audioManager.isInitialized) {
+          this.audioManager.playStartupSequenceSound(i);
+        }
         setTimeout(resolve, 400);
       });
     }

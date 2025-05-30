@@ -1,59 +1,83 @@
 /**
- * Audio Manager
- * Handles all sound effects and ambient audio
+ * Audio Manager - Lazy Loading Version
+ * Tone.js is loaded only when needed, after user interaction
  */
 export class AudioManager {
   constructor() {
     this.soundEnabled = false;
-    this.ambientVolume = -45; // Default whisper quiet
-    this.lastTickTime = 0; // Track last tick to prevent rapid firing
-    this.audioContext = null;
-    this.setupAudio();
-  }
-
-  async setupAudio() {
-    // Don't initialize Tone.js until user interaction
+    this.ambientVolume = -45;
+    this.lastTickTime = 0;
     this.isInitialized = false;
+    this.initializationAttempted = false;
+
+    // Audio objects start as null
+    this.ambientOscillator = null;
+    this.ambientFilter = null;
+    this.tickSynth = null;
+    this.startupSynth = null;
   }
 
-  async initializeAudio() {
-    if (this.isInitialized) return;
+  async ensureToneIsAvailable() {
+    // Check if Tone.js is available, if not load it
+    if (typeof Tone === 'undefined') {
+      if (typeof window.loadToneJS === 'function') {
+        await window.loadToneJS();
+      } else {
+        throw new Error('Tone.js loader not available');
+      }
+    }
+
+    // Verify Tone.js is now available
+    if (typeof Tone === 'undefined') {
+      throw new Error('Tone.js failed to load');
+    }
+
+    // Initialize audio objects if not done yet
+    if (!this.isInitialized && !this.initializationAttempted) {
+      await this.initializeAudioObjects();
+    }
+
+    return this.isInitialized;
+  }
+
+  async initializeAudioObjects() {
+    if (this.initializationAttempted) return this.isInitialized;
+
+    this.initializationAttempted = true;
 
     try {
-      // Ensure Tone.js context is started
+      // Ensure Tone.js context is ready
       if (Tone.context.state !== 'running') {
         await Tone.start();
       }
 
-      // Ultra-quiet ambient hum (barely audible)
-      this.ambientOscillator = new Tone.Oscillator({
-        frequency: 60,
-        type: "sawtooth"
-      }).toDestination();
-
+      // Create ambient filter
       this.ambientFilter = new Tone.Filter({
         frequency: 150,
         type: "lowpass"
       }).toDestination();
 
+      // Create ambient oscillator (don't start yet)
+      this.ambientOscillator = new Tone.Oscillator({
+        frequency: 60,
+        type: "sawtooth"
+      });
       this.ambientOscillator.connect(this.ambientFilter);
       this.ambientOscillator.volume.value = this.ambientVolume;
 
-      // Perfect tick sound for bit changes
+      // Create tick sound
       this.tickSynth = new Tone.NoiseSynth({
-        noise: {
-          type: "pink"
-        },
+        noise: { type: "pink" },
         envelope: {
           attack: 0.005,
-          decay: 0.06,  // Shorter decay to prevent overlap
+          decay: 0.06,
           sustain: 0,
-          release: 0.08 // Shorter release
+          release: 0.08
         }
       }).toDestination();
-      this.tickSynth.volume.value = -18; // Keep ticks prominent
+      this.tickSynth.volume.value = -18;
 
-      // Startup sound
+      // Create startup sound
       this.startupSynth = new Tone.FMSynth({
         harmonicity: 3,
         modulationIndex: 10,
@@ -67,93 +91,134 @@ export class AudioManager {
       this.startupSynth.volume.value = -15;
 
       this.isInitialized = true;
+      return true;
     } catch (error) {
-      console.warn('Audio initialization failed:', error);
+      console.warn('❌ Audio initialization failed:', error);
+      this.isInitialized = false;
+      return false;
     }
   }
 
   async toggleSound() {
-    // Initialize audio on first user interaction
-    if (!this.isInitialized) {
-      await this.initializeAudio();
-    }
+    try {
+      // Ensure Tone.js is loaded and initialized
+      const audioReady = await this.ensureToneIsAvailable();
+      if (!audioReady) {
+        console.warn('Audio not available');
+        return;
+      }
 
-    this.soundEnabled = !this.soundEnabled;
-    const button = d3.select('#soundToggle');
-    const icon = button.select('.sound-icon');
+      this.soundEnabled = !this.soundEnabled;
+      const button = d3.select('#soundToggle');
+      const icon = button.select('.sound-icon');
 
-    if (this.soundEnabled && this.isInitialized) {
-      try {
+      if (this.soundEnabled) {
         button.classed('active', true);
         icon.text('🔊');
 
-        if (this.ambientOscillator) {
+        // Start ambient oscillator
+        if (this.ambientOscillator && this.ambientOscillator.state === 'stopped') {
           this.ambientOscillator.start();
         }
 
-        // Soft confirmation tone
+        // Play confirmation tone
         if (this.startupSynth) {
           this.startupSynth.triggerAttackRelease('C4', '0.2s');
         }
-      } catch (error) {
-        console.warn('Error starting audio:', error);
-      }
-    } else {
-      button.classed('active', false);
-      icon.text('🔇');
+      } else {
+        button.classed('active', false);
+        icon.text('🔇');
 
-      if (this.ambientOscillator && this.isInitialized) {
-        try {
+        // Stop ambient oscillator
+        if (this.ambientOscillator && this.ambientOscillator.state === 'started') {
           this.ambientOscillator.stop();
 
-          // Restart oscillator for next time
+          // Recreate oscillator for next time
           this.ambientOscillator = new Tone.Oscillator({
             frequency: 60,
             type: "sawtooth"
-          }).connect(this.ambientFilter);
+          });
+          this.ambientOscillator.connect(this.ambientFilter);
           this.ambientOscillator.volume.value = this.ambientVolume;
-        } catch (error) {
-          console.warn('Error stopping audio:', error);
         }
       }
+    } catch (error) {
+      console.warn('Sound toggle failed:', error);
+
+      // Update UI to show sound is unavailable
+      const button = d3.select('#soundToggle');
+      const icon = button.select('.sound-icon');
+      button.classed('active', false);
+      icon.text('🚫');
     }
   }
 
-  // Method to adjust ambient volume
   setAmbientVolume(volume) {
-    this.ambientVolume = Math.max(-60, Math.min(-20, volume)); // Clamp between -60 and -20
+    this.ambientVolume = Math.max(-60, Math.min(-20, volume));
     if (this.soundEnabled && this.ambientOscillator) {
       this.ambientOscillator.volume.value = this.ambientVolume;
     }
   }
 
   playTickSound() {
-    if (!this.soundEnabled || !this.isInitialized || !this.tickSynth) return;
+    // Silently fail if audio not ready
+    if (!this.soundEnabled ||
+      !this.isInitialized ||
+      !this.tickSynth ||
+      typeof Tone === 'undefined' ||
+      Tone.context.state !== 'running') {
+      return;
+    }
 
-    // Prevent rapid-fire ticks (minimum 50ms between ticks)
     const now = Tone.now();
     if (now - this.lastTickTime < 0.05) return;
 
     try {
-      // Use Tone.now() + small offset for scheduling
       this.tickSynth.triggerAttackRelease('16n', now + 0.01);
       this.lastTickTime = now;
     } catch (error) {
-      console.warn('Tick sound failed:', error);
+      // Silently fail - don't spam console during normal operation
     }
   }
 
   playStartupSequenceSound(tubeIndex) {
-    if (!this.soundEnabled || !this.isInitialized || !this.startupSynth) return;
+    // Silently fail if audio not ready
+    if (!this.soundEnabled ||
+      !this.isInitialized ||
+      !this.startupSynth ||
+      typeof Tone === 'undefined' ||
+      Tone.context.state !== 'running') {
+      return;
+    }
 
     try {
       const frequencies = ['C5', 'D5', 'E5'];
       const freq = frequencies[tubeIndex % frequencies.length];
-      // Schedule with slight delay to avoid conflicts
       const when = Tone.now() + (tubeIndex * 0.1);
       this.startupSynth.triggerAttackRelease(freq, '0.15s', when);
     } catch (error) {
-      console.warn('Startup sound failed:', error);
+      // Silently fail - don't spam console during normal operation
     }
+  }
+
+  // Utility methods
+  getAudioState() {
+    return {
+      soundEnabled: this.soundEnabled,
+      isInitialized: this.isInitialized,
+      initializationAttempted: this.initializationAttempted,
+      toneAvailable: typeof Tone !== 'undefined',
+      contextState: typeof Tone !== 'undefined' ? Tone.context.state : 'unavailable',
+      hasOscillator: !!this.ambientOscillator,
+      hasTickSynth: !!this.tickSynth,
+      hasStartupSynth: !!this.startupSynth
+    };
+  }
+
+  // Check if audio is ready for use
+  isAudioReady() {
+    return this.isInitialized &&
+      typeof Tone !== 'undefined' &&
+      Tone.context.state === 'running';
   }
 }
