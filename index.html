@@ -2,7 +2,10 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="theme-color" content="#1a1a2e">
     <title>Binary Nixie Watch</title>
     <meta name="description" content="A beautiful binary clock with vintage Nixie tube aesthetics">
     <link rel="stylesheet" href="./src/css/styles.css">
@@ -28,17 +31,17 @@
 
             <div class="binary-section">
                 <div class="section-label">Hours</div>
-                <svg id="hoursSvg" width="300" height="100"></svg>
+                <svg id="hoursSvg" width="300" height="100" viewBox="0 0 300 100" preserveAspectRatio="xMidYMid meet"></svg>
             </div>
 
             <div class="binary-section">
                 <div class="section-label">Minutes</div>
-                <svg id="minutesSvg" width="360" height="100"></svg>
+                <svg id="minutesSvg" width="360" height="100" viewBox="0 0 360 100" preserveAspectRatio="xMidYMid meet"></svg>
             </div>
 
             <div class="binary-section">
                 <div class="section-label">Seconds</div>
-                <svg id="secondsSvg" width="360" height="100"></svg>
+                <svg id="secondsSvg" width="360" height="100" viewBox="0 0 360 100" preserveAspectRatio="xMidYMid meet"></svg>
             </div>
         </div>
     </div>
@@ -125,10 +128,49 @@
     document.addEventListener('touchstart', handleFirstInteraction);
   }
 
+  // Prevent zoom on double tap (iOS Safari)
+  let lastTouchEnd = 0;
+  document.addEventListener('touchend', function (event) {
+    var now = (new Date()).getTime();
+    if (now - lastTouchEnd <= 300) {
+      event.preventDefault();
+    }
+    lastTouchEnd = now;
+  }, false);
+
+  // Prevent pull-to-refresh
+  document.addEventListener('touchstart', function(e) {
+    if (e.touches.length > 1) {
+      e.preventDefault();
+    }
+  }, { passive: false });
+
+  let lastY = 0;
+  document.addEventListener('touchmove', function(e) {
+    const currentY = e.touches[0].clientY;
+    if (currentY > lastY && window.scrollY === 0) {
+      e.preventDefault();
+    }
+    lastY = currentY;
+  }, { passive: false });
+
   // Start the initialization process
   window.addEventListener('load', () => {
     setupAudioInteractionDetection();
     checkD3();
+  });
+
+  // Handle page visibility changes (battery optimization)
+  document.addEventListener('visibilitychange', () => {
+    if (window.nixieWatch) {
+      if (document.hidden) {
+        // Optionally reduce update frequency when hidden
+        console.log('Page hidden - maintaining normal operation');
+      } else {
+        // Ensure watch is still running when page becomes visible
+        console.log('Page visible - watch active');
+      }
+    }
   });
 </script>
 </body>

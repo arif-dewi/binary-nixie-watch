@@ -1,6 +1,6 @@
 /**
- * Audio Manager - Lazy Loading Version
- * Tone.js is loaded only when needed, after user interaction
+ * Audio Manager - Mobile Optimized Version
+ * Tone.js is loaded only when needed, with mobile battery optimizations
  */
 export class AudioManager {
   constructor() {
@@ -9,12 +9,45 @@ export class AudioManager {
     this.lastTickTime = 0;
     this.isInitialized = false;
     this.initializationAttempted = false;
+    this.isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
 
     // Audio objects start as null
     this.ambientOscillator = null;
     this.ambientFilter = null;
     this.tickSynth = null;
     this.startupSynth = null;
+
+    // Mobile-specific optimizations
+    this.tickThrottle = this.isMobile ? 100 : 50; // Longer throttle on mobile
+    this.setupMobileOptimizations();
+  }
+
+  setupMobileOptimizations() {
+    // Reduce audio quality slightly on mobile for better performance
+    if (this.isMobile) {
+      this.ambientVolume = -50; // Quieter ambient on mobile
+
+      // Listen for battery status if available
+      if ('getBattery' in navigator) {
+        navigator.getBattery().then(battery => {
+          battery.addEventListener('levelchange', () => {
+            // Disable ambient sound when battery is low
+            if (battery.level < 0.2 && this.soundEnabled) {
+              this.disableAmbientSound();
+            }
+          });
+        });
+      }
+
+      // Listen for page visibility changes to pause audio when hidden
+      document.addEventListener('visibilitychange', () => {
+        if (document.hidden && this.soundEnabled) {
+          this.pauseAudio();
+        } else if (!document.hidden && this.soundEnabled) {
+          this.resumeAudio();
+        }
+      });
+    }
   }
 
   async ensureToneIsAvailable() {
@@ -51,44 +84,44 @@ export class AudioManager {
         await Tone.start();
       }
 
-      // Create ambient filter
+      // Create ambient filter with mobile-optimized settings
       this.ambientFilter = new Tone.Filter({
-        frequency: 150,
+        frequency: this.isMobile ? 100 : 150, // Lower frequency on mobile
         type: "lowpass"
       }).toDestination();
 
       // Create ambient oscillator (don't start yet)
       this.ambientOscillator = new Tone.Oscillator({
-        frequency: 60,
+        frequency: this.isMobile ? 40 : 60, // Lower frequency on mobile
         type: "sawtooth"
       });
       this.ambientOscillator.connect(this.ambientFilter);
       this.ambientOscillator.volume.value = this.ambientVolume;
 
-      // Create tick sound
+      // Create tick sound with mobile optimization
       this.tickSynth = new Tone.NoiseSynth({
         noise: { type: "pink" },
         envelope: {
           attack: 0.005,
-          decay: 0.06,
+          decay: this.isMobile ? 0.04 : 0.06, // Shorter on mobile
           sustain: 0,
-          release: 0.08
+          release: this.isMobile ? 0.06 : 0.08 // Shorter on mobile
         }
       }).toDestination();
-      this.tickSynth.volume.value = -18;
+      this.tickSynth.volume.value = this.isMobile ? -22 : -18; // Quieter on mobile
 
       // Create startup sound
       this.startupSynth = new Tone.FMSynth({
         harmonicity: 3,
-        modulationIndex: 10,
+        modulationIndex: this.isMobile ? 8 : 10, // Simpler on mobile
         envelope: {
           attack: 0.01,
-          decay: 0.4,
+          decay: this.isMobile ? 0.3 : 0.4,
           sustain: 0.1,
-          release: 0.8
+          release: this.isMobile ? 0.6 : 0.8
         }
       }).toDestination();
-      this.startupSynth.volume.value = -15;
+      this.startupSynth.volume.value = this.isMobile ? -18 : -15; // Quieter on mobile
 
       this.isInitialized = true;
       return true;
@@ -116,14 +149,21 @@ export class AudioManager {
         button.classed('active', true);
         icon.text('🔊');
 
-        // Start ambient oscillator
+        // Start ambient oscillator (but not on mobile if battery is low)
         if (this.ambientOscillator && this.ambientOscillator.state === 'stopped') {
-          this.ambientOscillator.start();
+          if (!this.isMobile || !this.isLowBattery()) {
+            this.ambientOscillator.start();
+          }
         }
 
         // Play confirmation tone
         if (this.startupSynth) {
           this.startupSynth.triggerAttackRelease('C4', '0.2s');
+        }
+
+        // Add haptic feedback on mobile
+        if ('vibrate' in navigator) {
+          navigator.vibrate(50);
         }
       } else {
         button.classed('active', false);
@@ -135,7 +175,7 @@ export class AudioManager {
 
           // Recreate oscillator for next time
           this.ambientOscillator = new Tone.Oscillator({
-            frequency: 60,
+            frequency: this.isMobile ? 40 : 60,
             type: "sawtooth"
           });
           this.ambientOscillator.connect(this.ambientFilter);
@@ -171,7 +211,9 @@ export class AudioManager {
     }
 
     const now = Tone.now();
-    if (now - this.lastTickTime < 0.05) return;
+    const throttleTime = this.isMobile ? (this.tickThrottle / 1000) : 0.05;
+
+    if (now - this.lastTickTime < throttleTime) return;
 
     try {
       this.tickSynth.triggerAttackRelease('16n', now + 0.01);
@@ -201,6 +243,42 @@ export class AudioManager {
     }
   }
 
+  // Mobile-specific methods
+  pauseAudio() {
+    if (this.ambientOscillator && this.ambientOscillator.state === 'started') {
+      try {
+        Tone.Transport.pause();
+      } catch (error) {
+        // Silently handle error
+      }
+    }
+  }
+
+  resumeAudio() {
+    if (this.soundEnabled && this.ambientOscillator) {
+      try {
+        Tone.Transport.start();
+      } catch (error) {
+        // Silently handle error
+      }
+    }
+  }
+
+  disableAmbientSound() {
+    if (this.ambientOscillator && this.ambientOscillator.state === 'started') {
+      try {
+        this.ambientOscillator.stop();
+      } catch (error) {
+        // Silently handle error
+      }
+    }
+  }
+
+  isLowBattery() {
+    // Simple battery check - in a real app you'd want to use the Battery API
+    return false; // Placeholder - implement actual battery check if needed
+  }
+
   // Utility methods
   getAudioState() {
     return {
@@ -211,7 +289,9 @@ export class AudioManager {
       contextState: typeof Tone !== 'undefined' ? Tone.context.state : 'unavailable',
       hasOscillator: !!this.ambientOscillator,
       hasTickSynth: !!this.tickSynth,
-      hasStartupSynth: !!this.startupSynth
+      hasStartupSynth: !!this.startupSynth,
+      isMobile: this.isMobile,
+      tickThrottle: this.tickThrottle
     };
   }
 
