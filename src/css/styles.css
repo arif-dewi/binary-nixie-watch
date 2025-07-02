@@ -2,320 +2,320 @@
    RESET & BASE STYLES
    ========================================================================== */
 * {
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
 }
 
 body {
-    background: radial-gradient(ellipse at center, #1a1a2e 0%, #0f0f1e 100%);
-    min-height: 100vh;
-    font-family: 'Courier New', monospace;
-    overflow: hidden;
-    cursor: crosshair;
-    touch-action: none;
-    -webkit-user-select: none;
-    user-select: none;
+  background: radial-gradient(ellipse at center, #1a1a2e 0%, #0f0f1e 100%);
+  min-height: 100vh;
+  font-family: 'Courier New', monospace;
+  overflow: hidden;
+  cursor: crosshair;
+  touch-action: none;
+  -webkit-user-select: none;
+  user-select: none;
 }
 
 /* ==========================================================================
    SCENE & CONTAINER - RESPONSIVE
    ========================================================================== */
 .scene {
-    perspective: 800px;
-    height: 100vh;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    position: relative;
-    padding: 15px;
+  perspective: 800px;
+  height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  padding: 15px;
 }
 
 .watch-container {
-    transform-style: preserve-3d;
-    transition: transform 0.15s ease-out;
-    width: 100%;
-    max-width: 450px;
+  transform-style: preserve-3d;
+  transition: transform 0.15s ease-out;
+  width: 100%;
+  max-width: 450px;
 }
 
 .watch-base {
-    background: linear-gradient(145deg, #2c2c54, #1a1a2e);
-    border-radius: 20px;
-    padding: 30px 25px;
-    box-shadow:
-        0 20px 60px rgba(0, 0, 0, 0.6),
-        inset 0 2px 0 rgba(255, 255, 255, 0.1),
-        inset 0 -2px 0 rgba(0, 0, 0, 0.5),
-        0 0 30px rgba(255, 106, 0, 0.1);
-    border: 1px solid rgba(255, 165, 0, 0.2);
-    position: relative;
-    width: 100%;
+  background: linear-gradient(145deg, #2c2c54, #1a1a2e);
+  border-radius: 20px;
+  padding: 30px 25px;
+  box-shadow:
+      0 20px 60px rgba(0, 0, 0, 0.6),
+      inset 0 2px 0 rgba(255, 255, 255, 0.1),
+      inset 0 -2px 0 rgba(0, 0, 0, 0.5),
+      0 0 30px rgba(255, 106, 0, 0.1);
+  border: 1px solid rgba(255, 165, 0, 0.2);
+  position: relative;
+  width: 100%;
 }
 
 .watch-base::before {
-    content: '';
-    position: absolute;
-    top: 8px;
-    left: 50%;
-    transform: translateX(-50%);
-    width: 80%;
-    height: 3px;
-    background: linear-gradient(
-        90deg,
-        transparent,
-        rgba(255, 255, 255, 0.3),
-        transparent
-    );
-    border-radius: 2px;
+  content: '';
+  position: absolute;
+  top: 8px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 80%;
+  height: 3px;
+  background: linear-gradient(
+      90deg,
+      transparent,
+      rgba(255, 255, 255, 0.3),
+      transparent
+  );
+  border-radius: 2px;
 }
 
 /* ==========================================================================
    TIME DISPLAY & SECTIONS - RESPONSIVE
    ========================================================================== */
 .time-display {
-    color: #ff6a00;
-    text-align: center;
-    margin-bottom: 25px;
-    font-size: clamp(1rem, 4vw, 1.4em);
-    text-shadow: 0 0 15px #ff6a00;
-    opacity: 0.9;
-    letter-spacing: 2px;
+  color: #ff6a00;
+  text-align: center;
+  margin-bottom: 25px;
+  font-size: clamp(1rem, 4vw, 1.4em);
+  text-shadow: 0 0 15px #ff6a00;
+  opacity: 0.9;
+  letter-spacing: 2px;
 }
 
 .binary-section {
-    margin: 15px 0;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
+  margin: 15px 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
 }
 
 .section-label {
-    color: rgba(255, 165, 0, 0.6);
-    font-size: clamp(0.7rem, 2.5vw, 0.9em);
-    text-align: center;
-    margin-bottom: 10px;
-    text-transform: uppercase;
-    letter-spacing: 1px;
+  color: rgba(255, 165, 0, 0.6);
+  font-size: clamp(0.7rem, 2.5vw, 0.9em);
+  text-align: center;
+  margin-bottom: 10px;
+  text-transform: uppercase;
+  letter-spacing: 1px;
 }
 
 /* ==========================================================================
    SVG CONTAINERS - RESPONSIVE
    ========================================================================== */
 .binary-section svg {
-    width: 100%;
-    height: auto;
-    max-width: 100%;
+  width: 100%;
+  height: auto;
+  max-width: 100%;
 }
 
 /* ==========================================================================
    BACKGROUND EFFECTS
    ========================================================================== */
 .background-glow {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: radial-gradient(
-        circle at var(--glow-x, 50%) var(--glow-y, 50%),
-        rgba(255, 106, 0, 0.05) 0%,
-        transparent 50%
-    );
-    pointer-events: none;
-    transition: all 0.3s ease;
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: radial-gradient(
+      circle at var(--glow-x, 50%) var(--glow-y, 50%),
+      rgba(255, 106, 0, 0.05) 0%,
+      transparent 50%
+  );
+  pointer-events: none;
+  transition: all 0.3s ease;
 }
 
 /* ==========================================================================
    STARTUP OVERLAY
    ========================================================================== */
 .startup-overlay {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: #0f0f1e;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    z-index: 1000;
-    transition: opacity 0.5s ease;
-    padding: 20px;
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: #0f0f1e;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  transition: opacity 0.5s ease;
+  padding: 20px;
 }
 
 .startup-text {
-    color: #ff6a00;
-    font-size: clamp(1rem, 4vw, 1.5em);
-    text-shadow: 0 0 20px #ff6a00;
-    animation: pulse 2s infinite;
-    text-align: center;
+  color: #ff6a00;
+  font-size: clamp(1rem, 4vw, 1.5em);
+  text-shadow: 0 0 20px #ff6a00;
+  animation: pulse 2s infinite;
+  text-align: center;
 }
 
 @keyframes pulse {
-    0%,
-    100% {
-        opacity: 0.5;
-    }
-    50% {
-        opacity: 1;
-    }
+  0%,
+  100% {
+    opacity: 0.5;
+  }
+  50% {
+    opacity: 1;
+  }
 }
 
 /* ==========================================================================
    SOUND CONTROLS - MOBILE OPTIMIZED
    ========================================================================== */
 .sound-toggle {
-    position: fixed;
-    top: 20px;
-    right: 20px;
-    background: rgba(44, 44, 84, 0.9);
-    border: 1px solid rgba(255, 165, 0, 0.3);
-    border-radius: 50px;
-    padding: 10px 16px;
-    color: #ff6a00;
-    font-family: 'Courier New', monospace;
-    font-size: clamp(0.7rem, 2.5vw, 0.9em);
-    cursor: pointer;
-    transition: all 0.3s ease;
-    backdrop-filter: blur(10px);
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    z-index: 50;
-    touch-action: manipulation;
-    min-height: 44px; /* iOS touch target minimum */
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  background: rgba(44, 44, 84, 0.9);
+  border: 1px solid rgba(255, 165, 0, 0.3);
+  border-radius: 50px;
+  padding: 10px 16px;
+  color: #ff6a00;
+  font-family: 'Courier New', monospace;
+  font-size: clamp(0.7rem, 2.5vw, 0.9em);
+  cursor: pointer;
+  transition: all 0.3s ease;
+  backdrop-filter: blur(10px);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  z-index: 50;
+  touch-action: manipulation;
+  min-height: 44px; /* iOS touch target minimum */
 }
 
 .sound-toggle:hover,
 .sound-toggle:active {
-    background: rgba(44, 44, 84, 1);
-    box-shadow: 0 0 20px rgba(255, 165, 0, 0.3);
-    transform: scale(1.05);
+  background: rgba(44, 44, 84, 1);
+  box-shadow: 0 0 20px rgba(255, 165, 0, 0.3);
+  transform: scale(1.05);
 }
 
 .sound-toggle.active {
-    background: rgba(255, 106, 0, 0.2);
-    border-color: #ff6a00;
-    box-shadow: 0 0 15px rgba(255, 106, 0, 0.4);
+  background: rgba(255, 106, 0, 0.2);
+  border-color: #ff6a00;
+  box-shadow: 0 0 15px rgba(255, 106, 0, 0.4);
 }
 
 .sound-icon {
-    width: 16px;
-    height: 16px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 14px;
+  width: 16px;
+  height: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
 }
 
 /* ==========================================================================
    TUBE INTERACTIONS - TOUCH OPTIMIZED
    ========================================================================== */
 .tube {
-    cursor: pointer;
-    transition: filter 0.2s ease;
-    touch-action: manipulation;
+  cursor: pointer;
+  transition: filter 0.2s ease;
+  touch-action: manipulation;
 }
 
 .tube:hover,
 .tube:active {
-    filter: brightness(1.2);
+  filter: brightness(1.2);
 }
 
 /* ==========================================================================
    TOOLTIPS - MOBILE FRIENDLY
    ========================================================================== */
 .tooltip {
-    position: absolute;
-    background: rgba(0, 0, 0, 0.9);
-    color: #ff6a00;
-    padding: 8px 12px;
-    border-radius: 8px;
-    font-size: clamp(0.7rem, 2.5vw, 0.9em);
-    border: 1px solid rgba(255, 165, 0, 0.3);
-    pointer-events: none;
-    z-index: 100;
-    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.5);
-    max-width: 200px;
-    word-wrap: break-word;
+  position: absolute;
+  background: rgba(0, 0, 0, 0.9);
+  color: #ff6a00;
+  padding: 8px 12px;
+  border-radius: 8px;
+  font-size: clamp(0.7rem, 2.5vw, 0.9em);
+  border: 1px solid rgba(255, 165, 0, 0.3);
+  pointer-events: none;
+  z-index: 100;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.5);
+  max-width: 200px;
+  word-wrap: break-word;
 }
 
 /* ==========================================================================
    MOBILE SPECIFIC STYLES
    ========================================================================== */
 @media (max-width: 768px) {
-    .scene {
-        perspective: 600px;
-        padding: 10px;
-    }
+  .scene {
+    perspective: 600px;
+    padding: 10px;
+  }
 
-    .watch-base {
-        padding: 20px 15px;
-        border-radius: 15px;
-    }
+  .watch-base {
+    padding: 20px 15px;
+    border-radius: 15px;
+  }
 
-    .time-display {
-        margin-bottom: 20px;
-    }
+  .time-display {
+    margin-bottom: 20px;
+  }
 
-    .binary-section {
-        margin: 12px 0;
-    }
+  .binary-section {
+    margin: 12px 0;
+  }
 
-    .sound-toggle {
-        top: 15px;
-        right: 15px;
-        padding: 8px 12px;
-        gap: 4px;
-    }
+  .sound-toggle {
+    top: 15px;
+    right: 15px;
+    padding: 8px 12px;
+    gap: 4px;
+  }
 }
 
 @media (max-width: 480px) {
-    .scene {
-        perspective: 500px;
-        padding: 8px;
-    }
+  .scene {
+    perspective: 500px;
+    padding: 8px;
+  }
 
-    .watch-base {
-        padding: 15px 10px;
-        border-radius: 12px;
-    }
+  .watch-base {
+    padding: 15px 10px;
+    border-radius: 12px;
+  }
 
-    .time-display {
-        margin-bottom: 15px;
-    }
+  .time-display {
+    margin-bottom: 15px;
+  }
 
-    .binary-section {
-        margin: 10px 0;
-    }
+  .binary-section {
+    margin: 10px 0;
+  }
 
-    .section-label {
-        margin-bottom: 8px;
-    }
+  .section-label {
+    margin-bottom: 8px;
+  }
 
-    .sound-toggle {
-        top: 10px;
-        right: 10px;
-        padding: 6px 10px;
-    }
+  .sound-toggle {
+    top: 10px;
+    right: 10px;
+    padding: 6px 10px;
+  }
 
-    .tooltip {
-        font-size: 0.8em;
-        padding: 6px 10px;
-        max-width: 150px;
-    }
+  .tooltip {
+    font-size: 0.8em;
+    padding: 6px 10px;
+    max-width: 150px;
+  }
 }
 
 @media (max-height: 600px) {
-    .watch-base {
-        padding: 15px 20px;
-    }
+  .watch-base {
+    padding: 15px 20px;
+  }
 
-    .time-display {
-        margin-bottom: 15px;
-    }
+  .time-display {
+    margin-bottom: 15px;
+  }
 
-    .binary-section {
-        margin: 10px 0;
-    }
+  .binary-section {
+    margin: 10px 0;
+  }
 }

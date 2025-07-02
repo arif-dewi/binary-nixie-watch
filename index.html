@@ -1,53 +1,53 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <meta name="mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <meta name="theme-color" content="#1a1a2e">
-    <meta property="og:title" content="Binary Nixie Watch" />
-    <meta property="og:description" content="A stunning interactive binary clock with retro Nixie tube aesthetics." />
-    <meta property="og:type" content="website" />
-    <link rel="icon" href="./src/assets/favicon.png" type="image/x-icon">
-    <title>Binary Nixie Watch</title>
-    <meta name="description" content="A beautiful binary clock with vintage Nixie tube aesthetics">
-    <link rel="stylesheet" href="./src/css/styles.css">
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.8.5/d3.min.js"></script>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="theme-color" content="#1a1a2e">
+  <meta property="og:title" content="Binary Nixie Watch" />
+  <meta property="og:description" content="A stunning interactive binary clock with retro Nixie tube aesthetics." />
+  <meta property="og:type" content="website" />
+  <link rel="icon" href="./src/assets/favicon.png" type="image/x-icon">
+  <title>Binary Nixie Watch</title>
+  <meta name="description" content="A beautiful binary clock with vintage Nixie tube aesthetics">
+  <link rel="stylesheet" href="./src/css/styles.css">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.8.5/d3.min.js"></script>
 </head>
 <body>
 <div class="background-glow"></div>
 <div class="startup-overlay" id="startup">
-    <div class="startup-text">INITIALIZING BINARY CHRONOMETER...</div>
+  <div class="startup-text">INITIALIZING BINARY CHRONOMETER...</div>
 </div>
 
 <button class="sound-toggle" id="soundToggle">
-    <div class="sound-icon">🔇</div>
-    <span>SOUND</span>
+  <div class="sound-icon">🔇</div>
+  <span>SOUND</span>
 </button>
 
 <div class="scene">
-    <div class="watch-container" id="watchContainer">
-        <div class="watch-base">
-            <div class="time-display" id="timeDisplay">--:--:--</div>
+  <div class="watch-container" id="watchContainer">
+    <div class="watch-base">
+      <div class="time-display" id="timeDisplay">--:--:--</div>
 
-            <div class="binary-section">
-                <div class="section-label">Hours</div>
-                <svg id="hoursSvg" width="300" height="100" viewBox="0 0 300 100" preserveAspectRatio="xMidYMid meet"></svg>
-            </div>
+      <div class="binary-section">
+        <div class="section-label">Hours</div>
+        <svg id="hoursSvg" width="300" height="100" viewBox="0 0 300 100" preserveAspectRatio="xMidYMid meet"></svg>
+      </div>
 
-            <div class="binary-section">
-                <div class="section-label">Minutes</div>
-                <svg id="minutesSvg" width="360" height="100" viewBox="0 0 360 100" preserveAspectRatio="xMidYMid meet"></svg>
-            </div>
+      <div class="binary-section">
+        <div class="section-label">Minutes</div>
+        <svg id="minutesSvg" width="360" height="100" viewBox="0 0 360 100" preserveAspectRatio="xMidYMid meet"></svg>
+      </div>
 
-            <div class="binary-section">
-                <div class="section-label">Seconds</div>
-                <svg id="secondsSvg" width="360" height="100" viewBox="0 0 360 100" preserveAspectRatio="xMidYMid meet"></svg>
-            </div>
-        </div>
+      <div class="binary-section">
+        <div class="section-label">Seconds</div>
+        <svg id="secondsSvg" width="360" height="100" viewBox="0 0 360 100" preserveAspectRatio="xMidYMid meet"></svg>
+      </div>
     </div>
-    <noscript>Your browser does not support JavaScript, or it is disabled.</noscript>
+  </div>
+  <noscript>Your browser does not support JavaScript, or it is disabled.</noscript>
 </div>
 
 <script type="module">
