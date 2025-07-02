@@ -57,10 +57,6 @@ export const ANIMATION = {
   CLICK_FEEDBACK: 100,
 };
 
-export const VIBRATION = {
-  DEFAULT: 50,
-};
-
 export const TOOLTIP = {
   MAX_WIDTH: 120,
   OFFSET_X: 10,

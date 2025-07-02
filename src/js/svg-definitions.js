@@ -3,17 +3,10 @@
  * Handles all SVG filters, gradients, and visual effects
  */
 import { SVG_CONSTANTS as C } from './constants/svg';
+import { COLORS } from './constants/colors';
 
 export class SVGDefinitions {
-  constructor(config = {}) {
-    this.config = {
-      color: {
-        glow: C.COLORS.GLOW,
-        base: C.COLORS.BASE,
-        active: C.COLORS.ACTIVE,
-        ...config.color,
-      },
-    };
+  constructor() {
     this.createDefs();
   }
 
@@ -31,10 +24,6 @@ export class SVGDefinitions {
 
     this.createGlowFilter();
     this.createGradients();
-  }
-
-  destroy() {
-    this.svg?.remove();
   }
 
   createGlowFilter() {

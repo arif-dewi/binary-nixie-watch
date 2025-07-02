@@ -212,7 +212,6 @@ body {
    TUBE INTERACTIONS - TOUCH OPTIMIZED
    ========================================================================== */
 .tube {
-  cursor: pointer;
   transition: filter 0.2s ease;
   touch-action: manipulation;
 }

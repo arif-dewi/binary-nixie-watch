@@ -1,6 +1,8 @@
 import { SVGDefinitions } from './svg-definitions';
 import { AudioManager } from './audio-manager';
+import { SELECTORS } from './constants/selectors';
 import * as C from './constants/watch';
+import { COLORS } from "./constants/colors";
 
 export class BinaryNixieWatch {
   constructor() {
@@ -8,8 +10,6 @@ export class BinaryNixieWatch {
     this.previousBinaryStates = Object.fromEntries(
       C.SECTION_KEYS.map((k) => [k, ''])
     );
-    this.isPointerDown = false;
-    this.lastPointerPosition = { x: 0, y: 0 };
 
     this.svgDefinitions = new SVGDefinitions();
     this.audioManager = new AudioManager();
@@ -24,77 +24,77 @@ export class BinaryNixieWatch {
     this.setupOrientationChange();
   }
 
+  _handleMove(event) {
+    if (this.isStarting) return;
+
+    const isTouch = event.type === 'touchmove';
+    const point = isTouch ? event.touches?.[0] : event;
+    if (!point) return;
+
+    if (isTouch) event.preventDefault();
+
+    const x = (point.clientX / window.innerWidth - 0.5) * 2;
+    const y = (point.clientY / window.innerHeight - 0.5) * 2;
+    const isMobile = window.innerWidth <= C.MEDIA.MOBILE_WIDTH;
+
+    d3.select(SELECTORS.WATCH_CONTAINER).style(
+      'transform',
+      `rotateY(${x * (isMobile ? 4 : 8)}deg) rotateX(${-y * (isMobile ? 3 : 5)}deg)`
+    );
+
+    document.documentElement.style.setProperty(
+      '--glow-x',
+      `${(point.clientX / window.innerWidth) * 100}%`
+    );
+    document.documentElement.style.setProperty(
+      '--glow-y',
+      `${(point.clientY / window.innerHeight) * 100}%`
+    );
+  };
+
+  _resetPosition = () => {
+    d3.select(SELECTORS.WATCH_CONTAINER).style(
+      'transform',
+      'rotateY(0deg) rotateX(0deg)'
+    );
+    document.documentElement.style.setProperty(
+      '--glow-x',
+      C.GLOW_POSITION.DEFAULT_X
+    );
+    document.documentElement.style.setProperty(
+      '--glow-y',
+      C.GLOW_POSITION.DEFAULT_Y
+    );
+  };
+
   setupPointerEvents() {
-    const handleMove = (e) => {
-      if (this.isStarting) return;
-
-      const isTouch = e.type === 'touchmove';
-      const point = isTouch ? e.touches?.[0] : e;
-      if (!point) return;
-
-      if (isTouch) e.preventDefault();
-
-      const x = (point.clientX / window.innerWidth - 0.5) * 2;
-      const y = (point.clientY / window.innerHeight - 0.5) * 2;
-      const isMobile = window.innerWidth <= C.MEDIA.MOBILE_WIDTH;
-
-      d3.select('#watchContainer').style(
-        'transform',
-        `rotateY(${x * (isMobile ? 4 : 8)}deg) rotateX(${-y * (isMobile ? 3 : 5)}deg)`
-      );
-
-      document.documentElement.style.setProperty(
-        '--glow-x',
-        `${(point.clientX / window.innerWidth) * 100}%`
-      );
-      document.documentElement.style.setProperty(
-        '--glow-y',
-        `${(point.clientY / window.innerHeight) * 100}%`
-      );
-    };
-
-    const resetPosition = () => {
-      d3.select('#watchContainer').style(
-        'transform',
-        'rotateY(0deg) rotateX(0deg)'
-      );
-      document.documentElement.style.setProperty(
-        '--glow-x',
-        C.GLOW_POSITION.DEFAULT_X
-      );
-      document.documentElement.style.setProperty(
-        '--glow-y',
-        C.GLOW_POSITION.DEFAULT_Y
-      );
-    };
-
-    document.addEventListener('mousemove', handleMove, { passive: true });
-    document.addEventListener('touchmove', handleMove, { passive: false });
+    document.addEventListener('mousemove', this._handleMove, { passive: true });
+    document.addEventListener('touchmove', this._handleMove, { passive: false });
     document.addEventListener(
       'touchstart',
       (e) => {
-        if (e.touches.length > 1) resetPosition();
+        if (e.touches.length > 1) this._resetPosition();
       },
       { passive: true }
     );
   }
 
   setupSoundToggle() {
-    d3.select('#soundToggle').on('click', async (e) => {
+    d3.select(SELECTORS.SOUND_TOGGLE).on('click', async (e) => {
       e.preventDefault();
       try {
         await this.audioManager.toggleSound();
       } catch {
-        const btn = d3.select('#soundToggle');
+        const btn = d3.select(SELECTORS.SOUND_TOGGLE);
         btn.classed('active', false);
-        btn.select('.sound-icon').text('🔇');
+        btn.select(SELECTORS.SOUND_ICON).text('🔇');
       }
     });
   }
 
   setupOrientationChange() {
     const reset = () => {
-      d3.select('#watchContainer').style(
+      d3.select(SELECTORS.WATCH_CONTAINER).style(
         'transform',
         'rotateY(0deg) rotateX(0deg)'
       );
@@ -148,12 +148,12 @@ export class BinaryNixieWatch {
 
   async startupSequence() {
     await new Promise((r) => setTimeout(r, C.ANIMATION.STARTUP_DELAY));
-    d3.select('#startup')
+    d3.select(SELECTORS.STARTUP_SCREEN)
       .transition()
       .duration(500)
       .style('opacity', 0)
       .on('end', () => {
-        d3.select('#startup').style('display', 'none');
+        d3.select(SELECTORS.STARTUP_SCREEN).style('display', 'none');
         this.isStarting = false;
         this.updateTubeSizes();
       });
@@ -176,7 +176,6 @@ export class BinaryNixieWatch {
   }
 
   createTubes(svgId, bitCount, animate = false) {
-    const svg = d3.select(svgId).selectAll('.tube').remove().data([]);
     const [svgW, svgH] = [
       +d3.select(svgId).attr('width'),
       +d3.select(svgId).attr('height'),
@@ -230,7 +229,7 @@ export class BinaryNixieWatch {
       .attr('height', tubeH)
       .attr('rx', tubeW / 2)
       .attr('fill', 'url(#tubeGradient)')
-      .attr('stroke', 'rgba(255,165,0,0.3)')
+      .attr('stroke', COLORS.BASE)
       .attr('stroke-width', 1.5);
 
     tubes
@@ -239,7 +238,7 @@ export class BinaryNixieWatch {
       .attr('cy', (d) => d.y + tubeH * 0.2)
       .attr('rx', tubeW * 0.25)
       .attr('ry', tubeH * 0.12)
-      .attr('fill', 'rgba(255,255,255,0.2)');
+      .attr('fill', COLORS.WHITE);
 
     const fontSize = isSmall
       ? C.FONT_SIZE.SMALL
@@ -261,7 +260,7 @@ export class BinaryNixieWatch {
       .attr('font-size', fontSize)
       .attr('font-family', 'Courier New, monospace')
       .attr('font-weight', 'bold')
-      .attr('fill', '#ff6a00')
+      .attr('fill', COLORS.GLOW)
       .attr('opacity', 0.3)
       .text('0');
 
@@ -282,7 +281,7 @@ export class BinaryNixieWatch {
       seconds: now.getSeconds(),
     };
 
-    d3.select('#timeDisplay').text(
+    d3.select(SELECTORS.TIME_DISPLAY).text(
       `${sections.hours.toString().padStart(2, '0')}:${sections.minutes.toString().padStart(2, '0')}:${sections.seconds.toString().padStart(2, '0')}`
     );
 
@@ -321,7 +320,7 @@ export class BinaryNixieWatch {
       .data(bits)
       .transition()
       .duration(C.ANIMATION.UPDATE_TRANSITION)
-      .attr('stroke', (d) => (d ? '#ff6a00' : 'rgba(255,165,0,0.3)'))
+      .attr('stroke', (d) => (d ? COLORS.GLOW : COLORS.BASE))
       .attr('stroke-width', (d) => (d ? 2 : 1.5))
       .style('filter', (d) => (d ? 'url(#glow)' : 'none'));
   }
@@ -346,7 +345,7 @@ export class BinaryNixieWatch {
   }
 
   hideTooltip() {
-    d3.selectAll('.tooltip')
+    d3.selectAll(SELECTORS.TOOLTIP)
       .transition()
       .duration(C.ANIMATION.TOOLTIP_FADE_OUT)
       .style('opacity', 0)

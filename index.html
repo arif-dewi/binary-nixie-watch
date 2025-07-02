@@ -70,7 +70,6 @@
         resolve();
       };
       script.onerror = () => {
-        console.error('❌ Failed to load Tone.js');
         reject(new Error('Failed to load Tone.js'));
       };
       document.head.appendChild(script);
@@ -97,7 +96,6 @@
       window.nixieWatch = new BinaryNixieWatch();
       watchInitialized = true;
     } catch (error) {
-      console.error('❌ Error initializing watch:', error);
       document.getElementById('startup').innerHTML =
         '<div class="startup-text">Loading Error - Please Refresh</div>';
     }
@@ -158,19 +156,6 @@
   window.addEventListener('load', () => {
     setupAudioInteractionDetection();
     checkD3();
-  });
-
-  // Handle page visibility changes (battery optimization)
-  document.addEventListener('visibilitychange', () => {
-    if (window.nixieWatch) {
-      if (document.hidden) {
-        // Optionally reduce update frequency when hidden
-        console.log('Page hidden - maintaining normal operation');
-      } else {
-        // Ensure the watch is still running when the page becomes visible
-        console.log('Page visible - watch active');
-      }
-    }
   });
 </script>
 </body>

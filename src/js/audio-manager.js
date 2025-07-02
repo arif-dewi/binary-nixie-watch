@@ -1,4 +1,5 @@
 import { AUDIO_CONSTANTS as C } from './constants/audio';
+import { SELECTORS } from './constants/selectors';
 import {
   isToneAvailable,
   isToneReady,
@@ -111,47 +112,54 @@ export class AudioManager {
     }
   }
 
+  _enableSounds(btn, icon) {
+    btn.classed('active', true);
+    icon.text('🔊');
+
+    if (isOscillatorStopped(this.ambientOscillator)) {
+      if (!this.isMobile || !this.isLowBattery()) {
+        this.ambientOscillator.start();
+      }
+    }
+
+    this.tickSynth.volume.value = this.isMobile
+      ? C.VOLUME.TICK.MOBILE
+      : C.VOLUME.TICK.DESKTOP;
+
+    this.startupSynth?.triggerAttackRelease(
+      C.CONFIRM_TONE,
+      C.CONFIRM_TONE_DURATION
+    );
+    navigator.vibrate?.(C.VIBRATION);
+  }
+
+  _disableSounds(btn, icon) {
+    btn.classed('active', false);
+    icon.text('🔇');
+
+    this.ambientOscillator?.stop();
+    this.resetAmbientOscillator();
+
+    this.tickSynth.volume.value = C.VOLUME.TICK.MUTE;
+  }
+
   async toggleSound() {
     try {
       const ready = await this.ensureToneIsAvailable();
       if (!ready) return;
 
       this.soundEnabled = !this.soundEnabled;
-      const btn = d3.select('#soundToggle');
-      const icon = btn.select('.sound-icon');
+      const btn = d3.select(SELECTORS.SOUND_TOGGLE);
+      const icon = btn.select(SELECTORS.SOUND_ICON);
 
       if (this.soundEnabled) {
-        btn.classed('active', true);
-        icon.text('🔊');
-
-        if (isOscillatorStopped(this.ambientOscillator)) {
-          if (!this.isMobile || !this.isLowBattery()) {
-            this.ambientOscillator.start();
-          }
-        }
-
-        this.tickSynth.volume.value = this.isMobile
-          ? C.VOLUME.TICK.MOBILE
-          : C.VOLUME.TICK.DESKTOP;
-
-        this.startupSynth?.triggerAttackRelease(
-          C.CONFIRM_TONE,
-          C.CONFIRM_TONE_DURATION
-        );
-        navigator.vibrate?.(C.VIBRATION);
+        this._enableSounds(btn, icon);
       } else {
-        btn.classed('active', false);
-        icon.text('🔇');
-
-        this.ambientOscillator?.stop();
-        this.resetAmbientOscillator();
-
-        this.tickSynth.volume.value = C.VOLUME.TICK.MUTE;
+        this._disableSounds(btn, icon);
       }
     } catch (err) {
-      console.warn('🔇 toggleSound failed:', err);
-      const btn = d3.select('#soundToggle');
-      btn.classed('active', false).select('.sound-icon').text('🚫');
+      const btn = d3.select(SELECTORS.SOUND_TOGGLE);
+      btn.classed('active', false).select(SELECTORS.SOUND_ICON).text('🚫');
     }
   }
 

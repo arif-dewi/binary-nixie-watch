@@ -1,20 +1,4 @@
 export const SVG_CONSTANTS = {
-  COLORS: {
-    GLOW: '#ff6a00',
-    BASE: 'rgba(255,165,0,0.3)',
-    ACTIVE: 'rgba(255,165,0,0.6)',
-    WHITE_60: 'rgba(255,255,255,0.6)',
-    WHITE_20: 'rgba(255,255,255,0.2)',
-    WHITE_00: 'rgba(255,255,255,0)',
-    ORANGE_15: 'rgba(255,165,0,0.15)',
-    ORANGE_10: 'rgba(255,106,0,0.1)',
-    ORANGE_05: 'rgba(255,106,0,0.05)',
-    ORANGE_30: 'rgba(255,165,0,0.3)',
-    ORANGE_20: 'rgba(255,106,0,0.2)',
-    BLACK_40: 'rgba(0,0,0,0.4)',
-    BLACK_30: 'rgba(0,0,0,0.3)',
-  },
-
   FILTERS: {
     GLOW_STD_DEVIATIONS: [2, 5, 8],
     GLOW_MERGE_ORDER: [3, 2, 1],
