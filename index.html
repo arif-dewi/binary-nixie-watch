@@ -6,6 +6,10 @@
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="theme-color" content="#1a1a2e">
+    <meta property="og:title" content="Binary Nixie Watch" />
+    <meta property="og:description" content="A stunning interactive binary clock with retro Nixie tube aesthetics." />
+    <meta property="og:image" content="/assets/preview.png" />
+    <meta property="og:type" content="website" />
     <link rel="icon" href="favicon.ico" type="image/x-icon">
     <title>Binary Nixie Watch</title>
     <meta name="description" content="A beautiful binary clock with vintage Nixie tube aesthetics">
@@ -44,6 +48,7 @@
             </div>
         </div>
     </div>
+    <noscript>Your browser does not support JavaScript, or it is disabled.</noscript>
 </div>
 
 <script type="module">
@@ -89,15 +94,11 @@
         import('./src/js/nixie-watch.js')
       ]);
 
-      // Make classes available globally
-      window.SVGDefinitions = SVGDefinitions;
-      window.AudioManager = AudioManager;
-      window.BinaryNixieWatch = BinaryNixieWatch;
-
       // Initialize the watch
       window.nixieWatch = new BinaryNixieWatch();
       watchInitialized = true;
     } catch (error) {
+      console.error('❌ Error initializing watch:', error);
       document.getElementById('startup').innerHTML =
         '<div class="startup-text">Loading Error - Please Refresh</div>';
     }
