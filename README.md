@@ -2,149 +2,148 @@
 
 A beautiful binary clock with vintage Nixie tube aesthetics, built with D3.js and modern web technologies.
 
-![Binary Nixie Watch Preview](https://via.placeholder.com/800x400/1a1a2e/ff6a00?text=Binary+Nixie+Watch)
+[![CI](https://github.com/arif-dewi/binary-nixie-watch/actions/workflows/ci.yml/badge.svg)](https://github.com/arif-dewi/binary-nixie-watch/actions)
+[![Demo](https://img.shields.io/badge/demo-watch.arifdewi.dev-orange?logo=github)](https://watch.arifdewi.dev)
 
 ## ✨ Features
 
-- **Real-time binary clock** - Hours, minutes, and seconds in binary format
-- **Vintage Nixie tube design** - Warm amber glow with realistic glass reflections
-- **3D perspective effects** - Subtle camera movement that follows your mouse
-- **Immersive audio** - Optional ambient electrical hum and satisfying tick sounds
-- **Smooth animations** - D3.js powered transitions and startup sequence
-- **Interactive tooltips** - Hover over tubes to see binary math (2⁴ = 16)
-- **Responsive design** - Works on desktop and mobile devices
+* **Real-time binary clock** – Hours, minutes, and seconds in binary format
+* **Vintage Nixie tube design** – Warm amber glow with realistic glass reflections
+* **3D perspective effects** – Subtle camera movement that follows your mouse
+* **Immersive audio** – Optional ambient electrical hum and satisfying tick sounds
+* **Smooth animations** – D3.js powered transitions and startup sequence
+* **Interactive tooltips** – Hover over tubes to see binary math (2⁴ = 16)
+* **Responsive design** – Works on desktop and mobile devices
 
-## 🚀 Quick Start
+## 🚀 Live Demo
+
+* 🔗 **Live App**: [https://watch.arifdewi.dev](https://watch.arifdewi.dev)
+* 💾 **GitHub Repo**: [https://github.com/arif-dewi/binary-nixie-watch](https://github.com/arif-dewi/binary-nixie-watch)
+
+## 💠 Quick Start
 
 ### Prerequisites
-- Node.js 18+
-- npm or yarn
+
+* Node.js 18+
+* npm or yarn
 
 ### Installation
 
 ```bash
-# Clone the repository
-git clone https://github.com/yourusername/binary-nixie-watch.git
+git clone https://github.com/arif-dewi/binary-nixie-watch.git
 cd binary-nixie-watch
-
-# Install dependencies
 npm install
-
-# Start development server
 npm run dev
 ```
 
-Open your browser to `http://localhost:3000` and enjoy the watch!
+Open your browser to `http://localhost:5173` and enjoy the watch!
 
-## 🛠️ Development
-
-### Available Scripts
-
-- `npm run dev` - Start development server with hot reload
-- `npm run build` - Build for production
-- `npm run preview` - Preview production build
-- `npm run lint` - Lint JavaScript files
-- `npm run format` - Format code with Prettier
-- `npm run deploy` - Deploy to GitHub Pages
-
-### Project Structure
+## 📁 Project Structure
 
 ```
 binary-nixie-watch/
-├── index.html              # Main HTML file
+├── index.html
 ├── src/
 │   ├── css/
-│   │   └── styles.css      # All styling
+│   │   └── styles.css
 │   └── js/
-│       ├── svg-definitions.js  # SVG filters and gradients
-│       ├── audio-manager.js    # Sound effects
-│       └── nixie-watch.js      # Main watch logic
+│       ├── audio-manager.js
+│       ├── helpers/
+│       ├── nixie-watch.js
+│       └── svg-definitions.js
+├── tests/
+│   └── e2e.cy.js
+├── .github/
+│   └── workflows/ci.yml
 ├── package.json
 └── vite.config.js
 ```
 
-## 🎨 Customization
+## ⚙️ Available Scripts
 
-### Color Themes
-Modify the CSS variables in `styles.css`:
+* `npm run dev` – Start dev server
+* `npm run build` – Build for production
+* `npm run preview` – Preview production build
+* `npm run lint` – Lint JavaScript files
+* `npm run format` – Format code with Prettier
+* `npm run test` – Run unit tests (Vitest)
+* `npm run test:e2e` – Run Cypress end-to-end tests
+
+## 💖 Customization
+
+### Colors
+
+Edit CSS variables in `styles.css`:
+
 ```css
-/* For blue theme */
---primary-color: #4da6ff;
---glow-color: #66b3ff;
+:root {
+  --primary-color: #ff6a00;
+  --glow-color: #ff6a00;
+}
 ```
 
-### Audio Settings
-Adjust volume levels in `audio-manager.js`:
-```javascript
-this.ambientOscillator.volume.value = -35; // Ambient hum
-this.tickSynth.volume.value = -18;          // Tick sounds
+### Audio
+
+Edit `audio-manager.js`:
+
+```js
+this.ambientOscillator.volume.value = -35;
+this.tickSynth.volume.value = -18;
 ```
 
-### Animation Speed
-Change transition durations in `nixie-watch.js`:
-```javascript
+### Animation speed
+
+Edit `nixie-watch.js`:
+
+```js
 .transition()
-.duration(300) // Milliseconds
+.duration(300);
 ```
 
 ## 🚀 Deployment
 
 ### GitHub Pages
+
 ```bash
 npm run deploy
 ```
 
 ### Netlify
-1. Build the project: `npm run build`
-2. Upload the `dist/` folder to Netlify
 
-### Vercel
-```bash
-npx vercel --prod
-```
+1. Build the project: `npm run build`
+2. Upload `dist/` folder to Netlify
 
 ## 🧠 How It Works
 
-### Binary Time Display
-- **Hours**: 5-bit binary (0-23)
-- **Minutes**: 6-bit binary (0-59)
-- **Seconds**: 6-bit binary (0-59)
+### Binary Representation
 
-Each tube shows `1` (lit) or `0` (dimmed), representing the binary digits.
+* **Hours**: 5-bit (0–23)
+* **Minutes/Seconds**: 6-bit (0–59)
 
-### Technical Architecture
-- **D3.js** for data-driven DOM manipulation and smooth animations
-- **Tone.js** for Web Audio API sound synthesis
-- **Vite** for modern build tooling and hot reload
-- **ES6 modules** for clean, maintainable code organization
+### Tech Stack
 
-## 🎯 Browser Support
+* **D3.js** – For dynamic rendering and transitions
+* **Tone.js** – Web Audio API abstraction
+* **Vite** – Fast build tool
+* **Cypress/Vitest** – For testing
 
-- Chrome/Edge 88+
-- Firefox 85+
-- Safari 14+
-- Mobile browsers with WebGL support
+## 🔼 Browser Support
+
+* Chrome 88+
+* Firefox 85+
+* Safari 14+
+* Mobile with WebGL support
 
 ## 📄 License
 
-MIT License - feel free to use this project for learning or in your portfolio!
+MIT License
 
 ## 🤝 Contributing
 
-1. Fork the repository
-2. Create a feature branch: `git checkout -b feature-name`
-3. Commit changes: `git commit -am 'Add feature'`
-4. Push to branch: `git push origin feature-name`
-5. Submit a Pull Request
-
-## 🙏 Acknowledgments
-
-- Inspired by vintage Nixie tube electronics
-- Built with modern web technologies
-- Sound design using Web Audio API
+1. Fork the repo
+2. Create feature branch
+3. Push & open PR
 
 ---
 
-**Made with ❤️ and lots of ☕**
-
-*Show off your binary skills and impress your friends!* 🚀# binary-nixie-watch
+**Made with ❤️ and ☕ by [@arif-dewi](https://github.com/arif-dewi)**
