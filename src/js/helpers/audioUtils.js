@@ -8,10 +8,6 @@ export function isToneReady() {
   return isToneAvailable() && Tone.context.state === C.STATE.RUNNING;
 }
 
-export function isOscillatorStarted(osc) {
-  return osc?.state === C.STATE.STARTED;
-}
-
 export function isOscillatorStopped(osc) {
   return osc?.state === C.STATE.STOPPED;
 }

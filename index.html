@@ -8,9 +8,8 @@
     <meta name="theme-color" content="#1a1a2e">
     <meta property="og:title" content="Binary Nixie Watch" />
     <meta property="og:description" content="A stunning interactive binary clock with retro Nixie tube aesthetics." />
-    <meta property="og:image" content="/assets/preview.png" />
     <meta property="og:type" content="website" />
-    <link rel="icon" href="favicon.ico" type="image/x-icon">
+    <link rel="icon" href="./src/assets/favicon.png" type="image/x-icon">
     <title>Binary Nixie Watch</title>
     <meta name="description" content="A beautiful binary clock with vintage Nixie tube aesthetics">
     <link rel="stylesheet" href="./src/css/styles.css">
@@ -131,7 +130,8 @@
   // Prevent zoom on double tap (iOS Safari)
   let lastTouchEnd = 0;
   document.addEventListener('touchend', function (event) {
-    var now = (new Date()).getTime();
+    const now = (new Date()).getTime();
+
     if (now - lastTouchEnd <= 300) {
       event.preventDefault();
     }
@@ -167,7 +167,7 @@
         // Optionally reduce update frequency when hidden
         console.log('Page hidden - maintaining normal operation');
       } else {
-        // Ensure watch is still running when page becomes visible
+        // Ensure the watch is still running when the page becomes visible
         console.log('Page visible - watch active');
       }
     }

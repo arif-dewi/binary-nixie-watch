@@ -1,16 +1,11 @@
-import { SVGDefinitions } from './svg-definitions.js';
-import { AudioManager } from './audio-manager.js';
-
-const SECTION_KEYS = ['hours', 'minutes', 'seconds'];
+import { SVGDefinitions } from './svg-definitions'
+import { AudioManager } from './audio-manager'
+import * as C from './constants/watch';
 
 export class BinaryNixieWatch {
   constructor() {
     this.isStarting = true;
-    this.previousBinaryStates = {
-      hours: '',
-      minutes: '',
-      seconds: ''
-    };
+    this.previousBinaryStates = Object.fromEntries(C.SECTION_KEYS.map(k => [k, '']));
     this.isPointerDown = false;
     this.lastPointerPosition = { x: 0, y: 0 };
 
@@ -35,11 +30,11 @@ export class BinaryNixieWatch {
       const point = isTouch ? e.touches?.[0] : e;
       if (!point) return;
 
-      if (isTouch) e.preventDefault(); // prevent scroll
+      if (isTouch) e.preventDefault();
 
       const x = (point.clientX / window.innerWidth - 0.5) * 2;
       const y = (point.clientY / window.innerHeight - 0.5) * 2;
-      const isMobile = window.innerWidth <= 768;
+      const isMobile = window.innerWidth <= C.MEDIA.MOBILE_WIDTH;
 
       d3.select('#watchContainer')
         .style('transform', `rotateY(${x * (isMobile ? 4 : 8)}deg) rotateX(${-y * (isMobile ? 3 : 5)}deg)`);
@@ -50,8 +45,8 @@ export class BinaryNixieWatch {
 
     const resetPosition = () => {
       d3.select('#watchContainer').style('transform', 'rotateY(0deg) rotateX(0deg)');
-      document.documentElement.style.setProperty('--glow-x', '50%');
-      document.documentElement.style.setProperty('--glow-y', '50%');
+      document.documentElement.style.setProperty('--glow-x', C.GLOW_POSITION.DEFAULT_X);
+      document.documentElement.style.setProperty('--glow-y', C.GLOW_POSITION.DEFAULT_Y);
     };
 
     document.addEventListener('mousemove', handleMove, { passive: true });
@@ -78,8 +73,8 @@ export class BinaryNixieWatch {
   setupOrientationChange() {
     const reset = () => {
       d3.select('#watchContainer').style('transform', 'rotateY(0deg) rotateX(0deg)');
-      document.documentElement.style.setProperty('--glow-x', '50%');
-      document.documentElement.style.setProperty('--glow-y', '50%');
+      document.documentElement.style.setProperty('--glow-x', C.GLOW_POSITION.DEFAULT_X);
+      document.documentElement.style.setProperty('--glow-y', C.GLOW_POSITION.DEFAULT_Y);
       this.updateTubeSizes();
     };
     window.addEventListener('orientationchange', () => setTimeout(reset, 100), { passive: true });
@@ -87,23 +82,20 @@ export class BinaryNixieWatch {
   }
 
   updateTubeSizes() {
-    const [isMobile, isSmall] = [window.innerWidth <= 768, window.innerWidth <= 480];
-    const sizes = {
-      hours: [300, 100],
-      minutes: [360, 100],
-      seconds: [360, 100]
-    };
-    if (isSmall) sizes.hours = [250, 80], sizes.minutes = sizes.seconds = [300, 80];
-    else if (isMobile) sizes.hours = [280, 90], sizes.minutes = sizes.seconds = [330, 90];
+    const width = window.innerWidth;
+    const isSmall = width <= C.MEDIA.SMALL_WIDTH;
+    const isMobile = width <= C.MEDIA.MOBILE_WIDTH;
 
-    for (const key of SECTION_KEYS) {
+    const sizes = isSmall ? C.SVG_SIZE.SMALL : isMobile ? C.SVG_SIZE.MOBILE : C.SVG_SIZE.DESKTOP;
+
+    for (const key of C.SECTION_KEYS) {
       d3.select(`#${key}Svg`).attr('width', sizes[key][0]).attr('height', sizes[key][1]);
     }
 
     if (!this.isStarting) {
-      this.createTubes('#hoursSvg', 5);
-      this.createTubes('#minutesSvg', 6);
-      this.createTubes('#secondsSvg', 6);
+      for (const key of C.SECTION_KEYS) {
+        this.createTubes(`#${key}Svg`, C.BIT_LENGTH[key]);
+      }
     }
   }
 
@@ -114,7 +106,7 @@ export class BinaryNixieWatch {
   }
 
   async startupSequence() {
-    await new Promise(r => setTimeout(r, 2000));
+    await new Promise(r => setTimeout(r, C.ANIMATION.STARTUP_DELAY));
     d3.select('#startup').transition().duration(500).style('opacity', 0).on('end', () => {
       d3.select('#startup').style('display', 'none');
       this.isStarting = false;
@@ -124,29 +116,25 @@ export class BinaryNixieWatch {
   }
 
   async animateTubesStartup() {
-    const svgs = [
-      { id: '#hoursSvg', bits: 5 },
-      { id: '#minutesSvg', bits: 6 },
-      { id: '#secondsSvg', bits: 6 }
-    ];
-
-    for (let i = 0; i < svgs.length; i++) {
-      this.createTubes(svgs[i].id, svgs[i].bits, true);
+    for (const [i, key] of C.SECTION_KEYS.entries()) {
+      this.createTubes(`#${key}Svg`, C.BIT_LENGTH[key], true);
       if (this.audioManager.soundEnabled && this.audioManager.isInitialized) {
         this.audioManager.playStartupSequenceSound(i);
       }
-      await new Promise(r => setTimeout(r, 400));
+      await new Promise(r => setTimeout(r, C.ANIMATION.TUBE_ANIMATION_DURATION));
     }
   }
 
   createTubes(svgId, bitCount, animate = false) {
     const svg = d3.select(svgId).selectAll('.tube').remove().data([]);
     const [svgW, svgH] = [+d3.select(svgId).attr('width'), +d3.select(svgId).attr('height')];
-    const [isMobile, isSmall] = [window.innerWidth <= 768, window.innerWidth <= 480];
+    const width = window.innerWidth;
+    const isSmall = width <= C.MEDIA.SMALL_WIDTH;
+    const isMobile = width <= C.MEDIA.MOBILE_WIDTH;
 
     const [tubeW, tubeH, spacing] = isSmall
-      ? [35, 55, 42]
-      : isMobile ? [40, 65, 48] : [45, 70, 55];
+      ? C.TUBE_DIMENSIONS.SMALL
+      : isMobile ? C.TUBE_DIMENSIONS.MOBILE : C.TUBE_DIMENSIONS.DESKTOP;
 
     const startX = (svgW - (bitCount * spacing - (spacing - tubeW))) / 2;
     const data = Array.from({ length: bitCount }, (_, i) => ({
@@ -161,11 +149,10 @@ export class BinaryNixieWatch {
       .enter().append('g')
       .attr('class', 'tube')
       .style('opacity', animate ? 0 : 1)
-      .on('click', (e, d) => this.toggleBit(e, d))
       .on('touchstart', (e, d) => {
         e.preventDefault();
         this.showTooltip(e, d);
-        setTimeout(() => this.hideTooltip(), 2000);
+        setTimeout(() => this.hideTooltip(), C.ANIMATION.TOOLTIP_FADE_OUT);
       })
       .on('mouseover', (e, d) => {
         if (!('ontouchstart' in window)) {
@@ -189,11 +176,13 @@ export class BinaryNixieWatch {
       .attr('ry', tubeH * 0.12)
       .attr('fill', 'rgba(255,255,255,0.2)');
 
-    const fontSize = isSmall ? '20px' : isMobile ? '24px' : '28px';
+    const fontSize = isSmall ? C.FONT_SIZE.SMALL : isMobile ? C.FONT_SIZE.MOBILE : C.FONT_SIZE.DESKTOP;
+    const offsetY = isSmall ? C.DIGIT_OFFSET_Y.SMALL : isMobile ? C.DIGIT_OFFSET_Y.MOBILE : C.DIGIT_OFFSET_Y.DESKTOP;
+
     tubes.append('text')
       .attr('class', 'tube-digit')
       .attr('x', d => d.x + tubeW / 2)
-      .attr('y', d => d.y + tubeH / 2 + (isSmall ? 6 : 8))
+      .attr('y', d => d.y + tubeH / 2 + offsetY)
       .attr('text-anchor', 'middle')
       .attr('font-size', fontSize)
       .attr('font-family', 'Courier New, monospace')
@@ -202,16 +191,8 @@ export class BinaryNixieWatch {
       .attr('opacity', 0.3)
       .text('0');
 
-    tubes
-      .on('click', (e, d) => this.toggleBit(e, d))
-      .on('touchstart', (e, d) => {
-        e.preventDefault();
-        this.showTooltip(e, d);
-        setTimeout(() => this.hideTooltip(), 2000);
-      });
-
     if (animate) {
-      tubes.transition().duration(400).delay((_, i) => i * 100).style('opacity', 1);
+      tubes.transition().duration(C.ANIMATION.TUBE_ANIMATION_DURATION).delay((_, i) => i * C.ANIMATION.TUBE_ANIMATION_STAGGER).style('opacity', 1);
     }
   }
 
@@ -227,8 +208,8 @@ export class BinaryNixieWatch {
       `${sections.hours.toString().padStart(2, '0')}:${sections.minutes.toString().padStart(2, '0')}:${sections.seconds.toString().padStart(2, '0')}`
     );
 
-    for (const key of SECTION_KEYS) {
-      this.updateBinaryDisplay(`#${key}Svg`, sections[key], key, key === 'hours' ? 5 : 6);
+    for (const key of C.SECTION_KEYS) {
+      this.updateBinaryDisplay(`#${key}Svg`, sections[key], key, C.BIT_LENGTH[key]);
     }
   }
 
@@ -244,14 +225,14 @@ export class BinaryNixieWatch {
 
     svg.selectAll('.tube-digit')
       .data(bits)
-      .transition().duration(300)
+      .transition().duration(C.ANIMATION.UPDATE_TRANSITION)
       .attr('opacity', d => d ? 1 : 0.2)
       .attr('filter', d => d ? 'url(#glow)' : 'none')
       .text(d => d);
 
     svg.selectAll('.tube rect')
       .data(bits)
-      .transition().duration(300)
+      .transition().duration(C.ANIMATION.UPDATE_TRANSITION)
       .attr('stroke', d => d ? '#ff6a00' : 'rgba(255,165,0,0.3)')
       .attr('stroke-width', d => d ? 2 : 1.5)
       .style('filter', d => d ? 'url(#glow)' : 'none');
@@ -259,26 +240,19 @@ export class BinaryNixieWatch {
 
   showTooltip(event, d) {
     const point = event.touches?.[0] || event;
-    const x = Math.min(point.pageX + 10, window.innerWidth - 120);
-    const y = Math.max(point.pageY - 40, 10);
+    const x = Math.min(point.pageX + C.TOOLTIP.OFFSET_X, window.innerWidth - C.TOOLTIP.MAX_WIDTH);
+    const y = Math.max(point.pageY - C.TOOLTIP.OFFSET_Y, C.TOOLTIP.MIN_Y);
     d3.select('body').append('div')
       .attr('class', 'tooltip')
       .style('left', `${x}px`)
       .style('top', `${y}px`)
       .html(`2<sup>${Math.log2(d.power)}</sup> = ${d.power}`)
       .style('opacity', 0)
-      .transition().duration(200)
+      .transition().duration(C.ANIMATION.TOOLTIP_FADE_IN)
       .style('opacity', 1);
   }
 
   hideTooltip() {
-    d3.selectAll('.tooltip').transition().duration(200).style('opacity', 0).remove();
-  }
-
-  toggleBit(e, d) {
-    d3.select(e.currentTarget).select('rect')
-      .transition().duration(100).style('filter', 'brightness(1.5)')
-      .transition().duration(100).style('filter', null);
-    if ('vibrate' in navigator) navigator.vibrate(50);
+    d3.selectAll('.tooltip').transition().duration(C.ANIMATION.TOOLTIP_FADE_OUT).style('opacity', 0).remove();
   }
 }
