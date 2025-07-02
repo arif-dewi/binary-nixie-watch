@@ -1,3 +1,4 @@
+/* global Tone */
 import {
   isOscillatorStopped,
   isToneReady,

@@ -1,3 +1,4 @@
+/* global Tone */
 import { AUDIO_CONSTANTS as C } from '../constants/audio';
 
 export function isToneAvailable() {
