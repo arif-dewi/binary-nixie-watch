@@ -7,6 +7,9 @@ import { COLORS } from "./constants/colors";
 export class BinaryNixieWatch {
   constructor() {
     this.isStarting = true;
+    this.pendingMouse = null;
+    this.isFramePending = false;
+
     this.previousBinaryStates = Object.fromEntries(
       C.SECTION_KEYS.map((k) => [k, ''])
     );
@@ -24,7 +27,22 @@ export class BinaryNixieWatch {
     this.setupOrientationChange();
   }
 
-  _handleMove(event) {
+  _applyMouseMove = () => {
+    const { x, y, glowX, glowY } = this.pendingMouse;
+    const isMobile = window.innerWidth <= C.MEDIA.MOBILE_WIDTH;
+
+    d3.select(SELECTORS.WATCH_CONTAINER).style(
+      'transform',
+      `rotateY(${x * (isMobile ? 4 : 8)}deg) rotateX(${-y * (isMobile ? 3 : 5)}deg)`
+    );
+
+    document.documentElement.style.setProperty('--glow-x', `${glowX}%`);
+    document.documentElement.style.setProperty('--glow-y', `${glowY}%`);
+
+    this.isFramePending = false;
+  };
+
+  _handleMove = (event) => {
     if (this.isStarting) return;
 
     const isTouch = event.type === 'touchmove';
@@ -33,23 +51,17 @@ export class BinaryNixieWatch {
 
     if (isTouch) event.preventDefault();
 
-    const x = (point.clientX / window.innerWidth - 0.5) * 2;
-    const y = (point.clientY / window.innerHeight - 0.5) * 2;
-    const isMobile = window.innerWidth <= C.MEDIA.MOBILE_WIDTH;
+    this.pendingMouse = {
+      x: (point.clientX / window.innerWidth - 0.5) * 2,
+      y: (point.clientY / window.innerHeight - 0.5) * 2,
+      glowX: (point.clientX / window.innerWidth) * 100,
+      glowY: (point.clientY / window.innerHeight) * 100,
+    };
 
-    d3.select(SELECTORS.WATCH_CONTAINER).style(
-      'transform',
-      `rotateY(${x * (isMobile ? 4 : 8)}deg) rotateX(${-y * (isMobile ? 3 : 5)}deg)`
-    );
-
-    document.documentElement.style.setProperty(
-      '--glow-x',
-      `${(point.clientX / window.innerWidth) * 100}%`
-    );
-    document.documentElement.style.setProperty(
-      '--glow-y',
-      `${(point.clientY / window.innerHeight) * 100}%`
-    );
+    if (!this.isFramePending) {
+      this.isFramePending = true;
+      requestAnimationFrame(this._applyMouseMove);
+    }
   };
 
   _resetPosition = () => {
@@ -140,10 +152,24 @@ export class BinaryNixieWatch {
     }
   }
 
+  startAnimationLoop() {
+    const loop = () => {
+      const now = new Date();
+      const seconds = now.getSeconds();
+      if (seconds !== this.lastSecond) {
+        this.updateTime();
+        this.lastSecond = seconds;
+      }
+      requestAnimationFrame(loop);
+    };
+    this.lastSecond = null;
+    requestAnimationFrame(loop);
+  }
+
   async initializeWatch() {
     await this.startupSequence();
     this.updateTime();
-    setInterval(() => this.updateTime(), 1000);
+    this.startAnimationLoop();
   }
 
   async startupSequence() {
